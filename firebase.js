@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebas
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBGjOPM9KC1X2mcs2aqgCeJBqWEMy1iVew",
+  apiKey: "AIzaSyAPMHCStIpqHywdHNqKp3CsseI9MWqq3e0",
   authDomain: "qr-menu-system-fcb72.firebaseapp.com",
   projectId: "qr-menu-system-fcb72",
   storageBucket: "qr-menu-system-fcb72.firebasestorage.app",
