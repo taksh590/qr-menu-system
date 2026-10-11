@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Takshak Cafe | Digital Menu</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f7f7f2;
+      color: #20352a;
+    }
+    header {
+      background: #174d35;
+      color: white;
+      padding: 28px 18px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 8px; }
+    header p { margin: 0; color: #d7eadb; }
+    main { max-width: 760px; margin: auto; padding: 18px; }
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d3ddd4;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    #categories {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 16px 0;
+    }
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 14px;
+      background: #e4ebe3;
+      color: #174d35;
+      white-space: nowrap;
+    }
+    button.active, .add {
+      background: #174d35;
+      color: white;
+    }
+    #menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .item {
+      background: white;
+      padding: 16px;
+      border-radius: 14px;
+      box-shadow: 0 3px 12px #20352a0c;
+    }
+    .emoji { font-size: 44px; }
+    .item h3 { margin: 8px 0; }
+    .item p { color: #68746c; font-size: 14px; }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .price { font-weight: bold; font-size: 18px; }
+    .unavailable { color: #b42318; font-size: 13px; }
+    #cart {
+      margin-top: 22px;
+      padding: 18px;
+      background: white;
+      border-radius: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌿 Takshak Café</h1>
+    <p>Fresh Food • Great Taste • Good Vibes</p>
+    <p style="margin-top:12px">DIGITAL MENU</p>
+  </header>
+
+  <main>
+    <input id="search" placeholder="Search food or drinks..." />
+
+    <div id="categories"></div>
+    <div id="menu"></div>
+
+    <section id="cart">
+      <h2>🛒 Your Order</h2>
+      <div id="cartItems">No items added yet.</div>
+      <h3 id="total">Total: ₹0</h3>
+      <button onclick="clearCart()">Clear order</button>
+    </section>
+    <p style="text-align:center;color:#68746c;font-size:12px">
+      Demo menu • Sample items and prices
+    </p>
+  </main>
+
+  <script>
+    const foods = [
+      {id:1, name:"Veg Burger", category:"Snacks",
+       price:79, emoji:"🍔", available:true},
+      {id:2, name:"French Fries", category:"Snacks",
+       price:69, emoji:"🍟", available:true},
+      {id:3, name:"Masala Dosa", category:"Meals",
+       price:99, emoji:"🥞", available:true},
+      {id:4, name:"Veg Sandwich", category:"Snacks",
+       price:59, emoji:"🥪", available:false},
+      {id:5, name:"Cold Coffee", category:"Drinks",
+       price:89, emoji:"🥤", available:true},
+      {id:6, name:"Masala Chai", category:"Drinks",
+       price:20, emoji:"☕", available:true}
+    ];
+
+    let selected = "All";
+    let cart = {};
+
+    const categories = ["All", ...new Set(foods.map(f => f.category))];
+
+    function renderCategories() {
+      document.getElementById("categories").innerHTML =
+        categories.map(c =>
+          `<button class="${selected === c ? "active" : ""}"
+           onclick="selectCategory('${c}')">${c}</button>`
+        ).join("");
+    }
+
+    function selectCategory(category) {
+      selected = category;
+      renderCategories();
+      renderMenu();
+    }
+
+    function renderMenu() {
+      const query = document.getElementById("search").value.toLowerCase();
+      const filtered = foods.filter(f =>
+        (selected === "All" || f.category === selected) &&
+        f.name.toLowerCase().includes(query)
+      );
+
+      document.getElementById("menu").innerHTML = filtered.map(f => `
+        <article class="item">
+          <div class="emoji">${f.emoji}</div>
+          <h3>${f.name}</h3>
+          <p>${f.category}</p>
+          <div class="price-row">
+            <span class="price">₹${f.price}</span>
+            ${f.available
+              ? `<button class="add" onclick="addItem(${f.id})">Add +</button>`
+              : `<span class="unavailable">Out of stock</span>`}
+          </div>
+        </article>
+      `).join("") || "<p>No matching items found.</p>";
+    }
+
+    function addItem(id) {
+      const food = foods.find(f => f.id === id);
+      if (!food || !food.available) return;
+      cart[id] = (cart[id] || 0) + 1;
+      renderCart();
+    }
+
+    function renderCart() {
+      const entries = Object.entries(cart);
+      document.getElementById("cartItems").innerHTML =
+        entries.length
+          ? entries.map(([id, qty]) => {
+              const f = foods.find(x => x.id === Number(id));
+              return `<p>${f.name} × ${qty} — ₹${f.price * qty}</p>`;
+            }).join("")
+          : "No items added yet.";
+
+      const total = entries.reduce((sum, [id, qty]) => {
+        return sum + foods.find(f => f.id === Number(id)).price * qty;
+      }, 0);
+
+      document.getElementById("total").textContent = `Total: ₹${total}`;
+    }
+
+    function clearCart() {
+      cart = {};
+      renderCart();
+    }
+
+    document.getElementById("search").addEventListener("input", renderMenu);
+    renderCategories();
+    renderMenu();
+  </script>
+</body>
+</html>
